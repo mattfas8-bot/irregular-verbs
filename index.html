@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Irregular Verbs — O'yin</title>
+<style>
+  :root{
+    --paper:#fdfbf4;
+    --grid:#dce8f0;
+    --ink:#1d3557;
+    --red:#e63946;
+    --green:#2a9d8f;
+    --yellow:#ffb703;
+    --shadow:rgba(29,53,87,.15);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{
+    font-family:Georgia,'Times New Roman',serif;
+    background:var(--paper);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:28px 28px;
+    color:var(--ink);
+    min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;
+    padding:16px;
+  }
+  .wrap{width:100%;max-width:520px}
+  header{text-align:center;margin:8px 0 20px}
+  header h1{
+    font-size:26px;letter-spacing:.5px;
+    border-bottom:3px solid var(--red);
+    display:inline-block;padding:0 8px 4px;
+    transform:rotate(-1deg);
+  }
+  header p{font-size:14px;opacity:.7;margin-top:6px;font-style:italic}
+
+  .stats{
+    display:flex;justify-content:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;
+  }
+  .stat{
+    background:#fff;border:2px solid var(--ink);border-radius:10px;
+    padding:6px 14px;font-size:14px;box-shadow:3px 3px 0 var(--shadow);
+  }
+  .stat b{font-size:17px}
+  .streak b{color:var(--red)}
+  .score b{color:var(--green)}
+
+  .menu{display:flex;flex-direction:column;gap:12px}
+  .mode-btn{
+    background:#fff;border:2px solid var(--ink);border-radius:14px;
+    padding:18px 16px;font-family:inherit;font-size:17px;color:var(--ink);
+    cursor:pointer;text-align:left;box-shadow:4px 4px 0 var(--shadow);
+    transition:transform .1s;
+  }
+  .mode-btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--shadow)}
+  .mode-btn .emoji{font-size:24px;margin-right:10px}
+  .mode-btn small{display:block;font-size:13px;opacity:.65;margin-top:4px;font-style:italic}
+
+  .screen{display:none}
+  .screen.active{display:block}
+
+  .progress-bar{
+    height:10px;background:#fff;border:2px solid var(--ink);border-radius:99px;
+    overflow:hidden;margin-bottom:18px;
+  }
+  .progress-fill{height:100%;background:var(--yellow);width:0%;transition:width .3s}
+
+  .card{
+    background:#fff;border:2px solid var(--ink);border-radius:18px;
+    min-height:220px;display:flex;flex-direction:column;justify-content:center;align-items:center;
+    text-align:center;padding:24px;cursor:pointer;
+    box-shadow:5px 5px 0 var(--shadow);user-select:none;position:relative;
+  }
+  .card .hint{position:absolute;bottom:10px;font-size:12px;opacity:.5;font-style:italic}
+  .card .word{font-size:34px;font-weight:bold}
+  .card .forms{font-size:22px;color:var(--red);margin-top:8px}
+  .card .uz{font-size:24px;color:var(--green);margin-top:10px;font-style:italic}
+
+  .question{
+    background:#fff;border:2px solid var(--ink);border-radius:18px;
+    padding:24px;text-align:center;margin-bottom:16px;
+    box-shadow:5px 5px 0 var(--shadow);
+  }
+  .question .q-label{font-size:13px;opacity:.6;font-style:italic;margin-bottom:6px}
+  .question .q-word{font-size:30px;font-weight:bold}
+  .options{display:flex;flex-direction:column;gap:10px}
+  .opt{
+    background:#fff;border:2px solid var(--ink);border-radius:12px;
+    padding:14px;font-family:inherit;font-size:17px;color:var(--ink);
+    cursor:pointer;box-shadow:3px 3px 0 var(--shadow);transition:all .15s;
+  }
+  .opt:active{transform:translate(1px,1px)}
+  .opt.correct{background:var(--green);color:#fff;border-color:var(--green)}
+  .opt.wrong{background:var(--red);color:#fff;border-color:var(--red)}
+  .opt:disabled{cursor:default;opacity:.9}
+
+  .type-input{
+    width:100%;padding:14px;font-size:20px;font-family:inherit;
+    border:2px solid var(--ink);border-radius:12px;text-align:center;
+    margin-bottom:12px;background:#fff;color:var(--ink);
+  }
+  .type-input:focus{outline:3px solid var(--yellow)}
+  .feedback{
+    text-align:center;font-size:18px;min-height:28px;margin-bottom:12px;font-weight:bold;
+  }
+  .feedback.ok{color:var(--green)}
+  .feedback.no{color:var(--red)}
+
+  .nav-row{display:flex;gap:10px;margin-top:16px}
+  .btn{
+    flex:1;background:var(--ink);color:#fff;border:none;border-radius:12px;
+    padding:14px;font-family:inherit;font-size:16px;cursor:pointer;
+    box-shadow:3px 3px 0 var(--shadow);
+  }
+  .btn:active{transform:translate(1px,1px)}
+  .btn.secondary{background:#fff;color:var(--ink);border:2px solid var(--ink)}
+  .btn.yellow{background:var(--yellow);color:var(--ink)}
+
+  .result{
+    background:#fff;border:2px solid var(--ink);border-radius:18px;
+    padding:30px;text-align:center;box-shadow:5px 5px 0 var(--shadow);
+  }
+  .result h2{font-size:24px;margin-bottom:10px}
+  .result .big{font-size:48px;margin:10px 0}
+  .result p{margin-bottom:6px}
+
+  .tile{
+    background:#fff;border:2px solid var(--ink);border-radius:10px;
+    padding:14px 6px;font-family:inherit;font-size:15px;color:var(--ink);
+    cursor:pointer;box-shadow:2px 2px 0 var(--shadow);min-height:54px;
+    transition:all .15s;
+  }
+  .tile.sel{background:var(--yellow);transform:scale(1.03)}
+  .tile.done{background:var(--green);color:#fff;border-color:var(--green);opacity:.55;cursor:default}
+  .tile.bad{background:var(--red);color:#fff;border-color:var(--red)}
+
+  @keyframes pop{0%{transform:scale(.9)}60%{transform:scale(1.05)}100%{transform:scale(1)}}
+  .pop{animation:pop .25s ease}
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none!important;transition:none!important}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Irregular Verbs O'yini</h1>
+    <p>56 fe'l · ingliz ↔ o'zbek</p>
+  </header>
+
+  <div class="stats">
+    <div class="stat score">Ball: <b id="score">0</b></div>
+    <div class="stat streak">🔥 Seriya: <b id="streak">0</b></div>
+    <div class="stat">Eng yaxshi: <b id="best">0</b></div>
+  </div>
+
+  <div class="screen active" id="menu">
+    <div class="menu">
+      <button class="mode-btn" onclick="startCards()">
+        <span class="emoji">🃏</span>Kartochkalar
+        <small>So'zlarni ko'rib chiqing — bosib javobni oching</small>
+      </button>
+      <button class="mode-btn" onclick="startQuiz('uz')">
+        <span class="emoji">🎯</span>Viktorina: tarjima
+        <small>Inglizcha fe'lning o'zbekcha tarjimasini toping</small>
+      </button>
+      <button class="mode-btn" onclick="startQuiz('past')">
+        <span class="emoji">⏪</span>Viktorina: Past Simple
+        <small>Fe'lning 2-shaklini tanlang (go → went)</small>
+      </button>
+      <button class="mode-btn" onclick="startType()">
+        <span class="emoji">⌨️</span>Yozish rejimi (qiyin!)
+        <small>Past Simple shaklini o'zingiz yozing</small>
+      </button>
+      <button class="mode-btn" onclick="startSent()">
+        <span class="emoji">📝</span>Gaplar ichida
+        <small>Gapdagi bo'sh joyga to'g'ri shaklni yozing</small>
+      </button>
+      <button class="mode-btn" onclick="startMatch()">
+        <span class="emoji">🧩</span>Juftliklarni toping
+        <small>Fe'l va uning o'tgan zamonini juftlang (xotira o'yini)</small>
+      </button>
+    </div>
+  </div>
+
+  <div class="screen" id="cards">
+    <div class="progress-bar"><div class="progress-fill" id="cardProgress"></div></div>
+    <div class="card" id="flashcard" onclick="flipCard()">
+      <div class="word" id="cardWord"></div>
+      <div class="forms" id="cardForms" style="display:none"></div>
+      <div class="uz" id="cardUz" style="display:none"></div>
+      <div class="hint" id="cardHint">bosing — javob ochiladi</div>
+    </div>
+    <div class="nav-row">
+      <button class="btn secondary" onclick="goMenu()">← Menyu</button>
+      <button class="btn yellow" onclick="nextCard()">Keyingisi →</button>
+    </div>
+  </div>
+
+  <div class="screen" id="quiz">
+    <div class="progress-bar"><div class="progress-fill" id="quizProgress"></div></div>
+    <div class="question">
+      <div class="q-label" id="qLabel"></div>
+      <div class="q-word" id="qWord"></div>
+    </div>
+    <div class="options" id="options"></div>
+    <div class="nav-row">
+      <button class="btn secondary" onclick="goMenu()">← Menyu</button>
+    </div>
+  </div>
+
+  <div class="screen" id="typing">
+    <div class="progress-bar"><div class="progress-fill" id="typeProgress"></div></div>
+    <div class="question">
+      <div class="q-label">Past Simple shaklini yozing:</div>
+      <div class="q-word" id="typeWord"></div>
+    </div>
+    <input class="type-input" id="typeInput" autocomplete="off" autocapitalize="off" placeholder="javobni yozing...">
+    <div class="feedback" id="typeFeedback"></div>
+    <div class="nav-row">
+      <button class="btn secondary" onclick="goMenu()">← Menyu</button>
+      <button class="btn" onclick="checkType()" id="typeBtn">Tekshirish</button>
+    </div>
+  </div>
+
+  <div class="screen" id="sentences">
+    <div class="progress-bar"><div class="progress-fill" id="sentProgress"></div></div>
+    <div class="question">
+      <div class="q-label" id="sentLabel"></div>
+      <div class="q-word" id="sentText" style="font-size:21px;line-height:1.5"></div>
+    </div>
+    <input class="type-input" id="sentInput" autocomplete="off" autocapitalize="off" placeholder="javobni yozing...">
+    <div class="feedback" id="sentFeedback"></div>
+    <div class="nav-row">
+      <button class="btn secondary" onclick="goMenu()">← Menyu</button>
+      <button class="btn" onclick="checkSent()">Tekshirish</button>
+    </div>
+  </div>
+
+  <div class="screen" id="match">
+    <div class="progress-bar"><div class="progress-fill" id="matchProgress"></div></div>
+    <div class="question" style="padding:12px">
+      <div class="q-label">Fe'lni uning Past Simple shakli bilan juftlang</div>
+      <div style="font-size:14px;opacity:.7" id="matchRound"></div>
+    </div>
+    <div id="matchGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div>
+    <div class="nav-row">
+      <button class="btn secondary" onclick="goMenu()">← Menyu</button>
+    </div>
+  </div>
+
+  <div class="screen" id="result">
+    <div class="result">
+      <h2 id="resTitle">Natija</h2>
+      <div class="big" id="resEmoji">🎉</div>
+      <p id="resText"></p>
+      <p id="resAdvice" style="font-style:italic;opacity:.7"></p>
+      <div class="nav-row">
+        <button class="btn secondary" onclick="goMenu()">Menyu</button>
+        <button class="btn yellow" onclick="repeatMode()">Yana o'ynash</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const VERBS=[
+  {base:"be",past:"was / were",pastArr:["was","were","was/were","was / were"],uz:"bo'lmoq"},
+  {base:"beat",past:"beat",pastArr:["beat"],uz:"urmoq"},
+  {base:"become",past:"became",pastArr:["became"],uz:"bo'lmoq (o'zgarish)"},
+  {base:"begin",past:"began",pastArr:["began"],uz:"boshlamoq"},
+  {base:"break",past:"broke",pastArr:["broke"],uz:"sindirmoq"},
+  {base:"bring",past:"brought",pastArr:["brought"],uz:"olib kelmoq"},
+  {base:"build",past:"built",pastArr:["built"],uz:"qurmoq"},
+  {base:"buy",past:"bought",pastArr:["bought"],uz:"sotib olmoq"},
+  {base:"catch",past:"caught",pastArr:["caught"],uz:"tutmoq"},
+  {base:"choose",past:"chose",pastArr:["chose"],uz:"tanlamoq"},
+  {base:"come",past:"came",pastArr:["came"],uz:"kelmoq"},
+  {base:"cut",past:"cut",pastArr:["cut"],uz:"kesmoq"},
+  {base:"do",past:"did",pastArr:["did"],uz:"qilmoq"},
+  {base:"draw",past:"drew",pastArr:["drew"],uz:"chizmoq"},
+  {base:"drink",past:"drank",pastArr:["drank"],uz:"ichmoq"},
+  {base:"drive",past:"drove",pastArr:["drove"],uz:"haydamoq"},
+  {base:"eat",past:"ate",pastArr:["ate"],uz:"yemoq"},
+  {base:"fall",past:"fell",pastArr:["fell"],uz:"yiqilmoq"},
+  {base:"feel",past:"felt",pastArr:["felt"],uz:"his qilmoq"},
+  {base:"find",past:"found",pastArr:["found"],uz:"topmoq"},
+  {base:"fly",past:"flew",pastArr:["flew"],uz:"uchmoq"},
+  {base:"get",past:"got",pastArr:["got"],uz:"olmoq"},
+  {base:"give",past:"gave",pastArr:["gave"],uz:"bermoq"},
+  {base:"go",past:"went",pastArr:["went"],uz:"bormoq"},
+  {base:"grow",past:"grew",pastArr:["grew"],uz:"o'smoq"},
+  {base:"have",past:"had",pastArr:["had"],uz:"ega bo'lmoq"},
+  {base:"hear",past:"heard",pastArr:["heard"],uz:"eshitmoq"},
+  {base:"hold",past:"held",pastArr:["held"],uz:"ushlamoq"},
+  {base:"keep",past:"kept",pastArr:["kept"],uz:"saqlamoq"},
+  {base:"know",past:"knew",pastArr:["knew"],uz:"bilmoq"},
+  {base:"learn",past:"learnt / learned",pastArr:["learnt","learned","learnt/learned","learnt / learned"],uz:"o'rganmoq"},
+  {base:"leave",past:"left",pastArr:["left"],uz:"tark etmoq"},
+  {base:"lose",past:"lost",pastArr:["lost"],uz:"yo'qotmoq"},
+  {base:"make",past:"made",pastArr:["made"],uz:"yasamoq"},
+  {base:"meet",past:"met",pastArr:["met"],uz:"uchrashmoq"},
+  {base:"read",past:"read",pastArr:["read"],uz:"o'qimoq"},
+  {base:"ride",past:"rode",pastArr:["rode"],uz:"minmoq"},
+  {base:"run",past:"ran",pastArr:["ran"],uz:"yugurmoq"},
+  {base:"say",past:"said",pastArr:["said"],uz:"aytmoq"},
+  {base:"see",past:"saw",pastArr:["saw"],uz:"ko'rmoq"},
+  {base:"sell",past:"sold",pastArr:["sold"],uz:"sotmoq"},
+  {base:"send",past:"sent",pastArr:["sent"],uz:"yubormoq"},
+  {base:"sit",past:"sat",pastArr:["sat"],uz:"o'tirmoq"},
+  {base:"sleep",past:"slept",pastArr:["slept"],uz:"uxlamoq"},
+  {base:"speak",past:"spoke",pastArr:["spoke"],uz:"gapirmoq"},
+  {base:"stand",past:"stood",pastArr:["stood"],uz:"turmoq"},
+  {base:"swim",past:"swam",pastArr:["swam"],uz:"suzmoq"},
+  {base:"take",past:"took",pastArr:["took"],uz:"olmoq (olib ketmoq)"},
+  {base:"teach",past:"taught",pastArr:["taught"],uz:"o'qitmoq"},
+  {base:"tell",past:"told",pastArr:["told"],uz:"aytib bermoq"},
+  {base:"think",past:"thought",pastArr:["thought"],uz:"o'ylamoq"},
+  {base:"throw",past:"threw",pastArr:["threw"],uz:"uloqtirmoq"},
+  {base:"understand",past:"understood",pastArr:["understood"],uz:"tushunmoq"},
+  {base:"wear",past:"wore",pastArr:["wore"],uz:"kiymoq"},
+  {base:"win",past:"won",pastArr:["won"],uz:"yutmoq"},
+  {base:"write",past:"wrote",pastArr:["wrote"],uz:"yozmoq"}
+];
+
+const SENTENCES=[
+  {s:"She ___ some chocolates to the party.",v:"bring",a:["brought"]},
+  {s:"I ___ a new song on the radio.",v:"hear",a:["heard"]},
+  {s:"I ___ three books last week.",v:"read",a:["read"]},
+  {s:"They ___ French to the waitress.",v:"speak",a:["spoke"]},
+  {s:"He ___ during the class, but now he doesn't understand.",v:"understand",a:["understood"]},
+  {s:"I ___ to buy some milk.",v:"forget",a:["forgot"]},
+  {s:"She ___ a baby in June.",v:"have",a:["had"]},
+  {s:"You ___ your keys last week.",v:"lose",a:["lost"]},
+  {s:"They ___ 500m.",v:"swim",a:["swam"]},
+  {s:"I ___ my mother a CD for Christmas.",v:"give",a:["gave"]},
+  {s:"At the age of 23, she ___ a doctor.",v:"become",a:["became"]},
+  {s:"I ___ the answer yesterday.",v:"know",a:["knew"]},
+  {s:"He ___ me that he lived in Toronto.",v:"tell",a:["told"]},
+  {s:"We ___ John £200.",v:"lend",a:["lent"]},
+  {s:"She ___ too much coffee yesterday.",v:"drink",a:["drank"]},
+  {s:"The children ___ in the car.",v:"sleep",a:["slept"]},
+  {s:"He ___ his promise.",v:"keep",a:["kept"]},
+  {s:"I ___ the steak for dinner.",v:"choose",a:["chose"]},
+  {s:"The film ___ late.",v:"begin",a:["began"]},
+  {s:"We ___ to Sydney.",v:"fly",a:["flew"]},
+  {s:"They ___ to Beijing.",v:"drive",a:["drove"]},
+  {s:"He ___ English at the University.",v:"teach",a:["taught"]},
+  {s:"I ___ you an e-mail earlier.",v:"send",a:["sent"]},
+  {s:"We ___ the house at 7 am.",v:"leave",a:["left"]},
+  {s:"He ___ terrible after eating the prawns.",v:"feel",a:["felt"]}
+];
+
+let score=0,streak=0,best=0;
+let deck=[],idx=0,flipped=false;
+let quizType='uz',correctCount=0,lastMode=null;
+
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function updStats(){
+  document.getElementById('score').textContent=score;
+  document.getElementById('streak').textContent=streak;
+  if(streak>best){best=streak}
+  document.getElementById('best').textContent=best;
+}
+function addPoint(ok){
+  if(ok){score+=10+streak*2;streak++;correctCount++}
+  else{streak=0}
+  updStats();
+}
+function goMenu(){show('menu')}
+
+function startCards(){
+  lastMode=startCards;
+  deck=shuffle(VERBS);idx=0;flipped=false;
+  show('cards');renderCard();
+}
+function renderCard(){
+  const v=deck[idx];flipped=false;
+  document.getElementById('cardWord').textContent=v.base;
+  document.getElementById('cardForms').style.display='none';
+  document.getElementById('cardUz').style.display='none';
+  document.getElementById('cardForms').textContent=v.base+" – "+v.past;
+  document.getElementById('cardUz').textContent=v.uz;
+  document.getElementById('cardHint').textContent='bosing — javob ochiladi';
+  document.getElementById('cardProgress').style.width=((idx)/deck.length*100)+'%';
+  document.getElementById('flashcard').classList.remove('pop');
+  void document.getElementById('flashcard').offsetWidth;
+  document.getElementById('flashcard').classList.add('pop');
+}
+function flipCard(){
+  flipped=!flipped;
+  document.getElementById('cardForms').style.display=flipped?'block':'none';
+  document.getElementById('cardUz').style.display=flipped?'block':'none';
+  document.getElementById('cardHint').textContent=flipped?'bosing — yashiriladi':'bosing — javob ochiladi';
+}
+function nextCard(){
+  idx++;
+  if(idx>=deck.length){finish('Kartochkalar tugadi!','📚','Siz barcha 56 fe\'lni ko\'rib chiqdingiz.','Endi viktorinada o\'zingizni sinab ko\'ring!');return}
+  renderCard();
+}
+
+function startQuiz(type){
+  lastMode=()=>startQuiz(type);
+  quizType=type;deck=shuffle(VERBS);idx=0;correctCount=0;
+  show('quiz');renderQuiz();
+}
+function renderQuiz(){
+  const v=deck[idx];
+  document.getElementById('quizProgress').style.width=(idx/deck.length*100)+'%';
+  const label=document.getElementById('qLabel');
+  const word=document.getElementById('qWord');
+  let correct,pool;
+  if(quizType==='uz'){
+    label.textContent='Tarjimani toping:';
+    word.textContent=v.base+' – '+v.past;
+    correct=v.uz;
+    pool=VERBS.filter(x=>x.uz!==v.uz).map(x=>x.uz);
+  }else{
+    label.textContent='Past Simple shaklini tanlang:';
+    word.textContent=v.base+'  ('+v.uz+')';
+    correct=v.past;
+    pool=VERBS.filter(x=>x.past!==v.past).map(x=>x.past);
+  }
+  const opts=shuffle([correct,...shuffle(pool).slice(0,3)]);
+  const box=document.getElementById('options');box.innerHTML='';
+  opts.forEach(o=>{
+    const b=document.createElement('button');
+    b.className='opt';b.textContent=o;
+    b.onclick=()=>answerQuiz(b,o===correct,correct);
+    box.appendChild(b);
+  });
+}
+function answerQuiz(btn,ok,correct){
+  document.querySelectorAll('.opt').forEach(b=>{
+    b.disabled=true;
+    if(b.textContent===correct)b.classList.add('correct');
+  });
+  if(!ok)btn.classList.add('wrong');
+  addPoint(ok);
+  setTimeout(()=>{
+    idx++;
+    if(idx>=deck.length){
+      finishQuiz();return;
+    }
+    renderQuiz();
+  },ok?700:1400);
+}
+function finishQuiz(){
+  const pct=Math.round(correctCount/deck.length*100);
+  let emoji='🎉',advice='Zo\'r natija!';
+  if(pct<50){emoji='💪';advice='Avval kartochkalarni takrorlang va yana urinib ko\'ring.'}
+  else if(pct<80){emoji='👍';advice='Yaxshi! Yana bir marta o\'ynasangiz, yanada mustahkamlanadi.'}
+  finish('Viktorina tugadi!',emoji,`To'g'ri javoblar: ${correctCount} / ${deck.length} (${pct}%)`,advice);
+}
+
+function startType(){
+  lastMode=startType;
+  deck=shuffle(VERBS);idx=0;correctCount=0;
+  show('typing');renderType();
+}
+function renderType(){
+  const v=deck[idx];
+  document.getElementById('typeProgress').style.width=(idx/deck.length*100)+'%';
+  document.getElementById('typeWord').textContent=v.base+'  ('+v.uz+')';
+  document.getElementById('typeInput').value='';
+  document.getElementById('typeFeedback').textContent='';
+  document.getElementById('typeFeedback').className='feedback';
+  document.getElementById('typeInput').focus();
+}
+function checkType(){
+  const v=deck[idx];
+  const val=document.getElementById('typeInput').value.trim().toLowerCase();
+  if(!val)return;
+  const ok=v.pastArr.some(p=>p.toLowerCase()===val);
+  const fb=document.getElementById('typeFeedback');
+  addPoint(ok);
+  if(ok){fb.textContent='✓ To\'g\'ri!';fb.className='feedback ok'}
+  else{fb.textContent='✗ To\'g\'ri javob: '+v.past;fb.className='feedback no'}
+  setTimeout(()=>{
+    idx++;
+    if(idx>=deck.length){
+      const pct=Math.round(correctCount/deck.length*100);
+      let emoji=pct>=80?'🏆':pct>=50?'👍':'💪';
+      finish('Yozish rejimi tugadi!',emoji,`To'g'ri: ${correctCount} / ${deck.length} (${pct}%)`,pct>=80?'Siz chempionsiz!':'Mashq qilishda davom eting!');
+      return;
+    }
+    renderType();
+  },ok?700:1600);
+}
+document.getElementById('typeInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkType()});
+
+let sentDeck=[];
+function startSent(){
+  lastMode=startSent;
+  sentDeck=shuffle(SENTENCES);idx=0;correctCount=0;
+  show('sentences');renderSent();
+}
+function renderSent(){
+  const q=sentDeck[idx];
+  document.getElementById('sentProgress').style.width=(idx/sentDeck.length*100)+'%';
+  document.getElementById('sentLabel').textContent='Fe\'l: '+q.v+'  ('+(idx+1)+'/'+sentDeck.length+')';
+  document.getElementById('sentText').textContent=q.s;
+  document.getElementById('sentInput').value='';
+  document.getElementById('sentFeedback').textContent='';
+  document.getElementById('sentFeedback').className='feedback';
+  document.getElementById('sentInput').focus();
+}
+function checkSent(){
+  const q=sentDeck[idx];
+  const val=document.getElementById('sentInput').value.trim().toLowerCase();
+  if(!val)return;
+  const ok=q.a.some(p=>p.toLowerCase()===val);
+  const fb=document.getElementById('sentFeedback');
+  addPoint(ok);
+  if(ok){fb.textContent='✓ To\'g\'ri! '+q.s.replace('___',q.a[0]);fb.className='feedback ok'}
+  else{fb.textContent='✗ To\'g\'ri javob: '+q.a[0];fb.className='feedback no'}
+  setTimeout(()=>{
+    idx++;
+    if(idx>=sentDeck.length){
+      const pct=Math.round(correctCount/sentDeck.length*100);
+      finish('Gaplar tugadi!',pct>=80?'🏆':pct>=50?'👍':'💪',`To'g'ri: ${correctCount} / ${sentDeck.length} (${pct}%)`,pct>=80?'Ajoyib! Siz gaplarda ham ishlata olasiz!':'Yana mashq qiling — gaplar eng muhim qism!');
+      return;
+    }
+    renderSent();
+  },ok?1100:1800);
+}
+document.getElementById('sentInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkSent()});
+
+let matchRound=0,matchTotalRounds=3,matchSel=null,matchLeft=0,matchBusy=false;
+function startMatch(){
+  lastMode=startMatch;
+  deck=shuffle(VERBS);matchRound=0;
+  show('match');renderMatch();
+}
+function renderMatch(){
+  matchSel=null;matchBusy=false;
+  const verbs=deck.slice(matchRound*6,matchRound*6+6);
+  matchLeft=verbs.length;
+  document.getElementById('matchRound').textContent='Raund '+(matchRound+1)+' / '+matchTotalRounds;
+  document.getElementById('matchProgress').style.width=(matchRound/matchTotalRounds*100)+'%';
+  const tiles=[];
+  verbs.forEach(v=>{
+    tiles.push({txt:v.base,key:v.base});
+    tiles.push({txt:v.past,key:v.base});
+  });
+  const grid=document.getElementById('matchGrid');grid.innerHTML='';
+  shuffle(tiles).forEach(t=>{
+    const b=document.createElement('button');
+    b.className='tile';b.textContent=t.txt;b.dataset.key=t.key;
+    b.onclick=()=>tapTile(b);
+    grid.appendChild(b);
+  });
+}
+function tapTile(b){
+  if(matchBusy||b.classList.contains('done'))return;
+  if(matchSel===b){b.classList.remove('sel');matchSel=null;return}
+  if(!matchSel){matchSel=b;b.classList.add('sel');return}
+  const a=matchSel;matchSel=null;
+  if(a.dataset.key===b.dataset.key && a.textContent!==b.textContent){
+    a.classList.remove('sel');
+    a.classList.add('done');b.classList.add('done');
+    addPoint(true);
+    matchLeft--;
+    if(matchLeft===0){
+      setTimeout(()=>{
+        matchRound++;
+        if(matchRound>=matchTotalRounds){
+          finish('Juftliklar tugadi!','🧩','Siz '+(matchTotalRounds*6)+' ta fe\'lni juftladingiz!','Har safar yangi fe\'llar tushadi — yana o\'ynang!');
+        }else{renderMatch()}
+      },600);
+    }
+  }else{
+    matchBusy=true;
+    a.classList.remove('sel');
+    a.classList.add('bad');b.classList.add('bad');
+    streak=0;updStats();
+    setTimeout(()=>{a.classList.remove('bad');b.classList.remove('bad');matchBusy=false},500);
+  }
+}
+
+function finish(title,emoji,text,advice){
+  document.getElementById('resTitle').textContent=title;
+  document.getElementById('resEmoji').textContent=emoji;
+  document.getElementById('resText').textContent=text;
+  document.getElementById('resAdvice').textContent=advice;
+  document.getElementById('cardProgress').style.width='100%';
+  show('result');
+}
+function repeatMode(){if(lastMode)lastMode()}
+</script>
+</body>
+</html>
