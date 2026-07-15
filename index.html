@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Irregular Verbs — O'yin</title>
+<title>Irregular Verbs — Game</title>
 <style>
   :root{
     --paper:#fdfbf4;
@@ -47,6 +47,7 @@
   .stat b{font-size:17px}
   .streak b{color:var(--red)}
   .score b{color:var(--green)}
+  button.stat{font-family:inherit;color:var(--ink);cursor:pointer}
 
   .menu{display:flex;flex-direction:column;gap:12px}
   .mode-btn{
@@ -137,6 +138,8 @@
   .tile.done{background:var(--green);color:#fff;border-color:var(--green);opacity:.55;cursor:default}
   .tile.bad{background:var(--red);color:#fff;border-color:var(--red)}
 
+  .lang-title{text-align:center;font-size:18px;margin-bottom:14px;font-style:italic}
+
   @keyframes pop{0%{transform:scale(.9)}60%{transform:scale(1.05)}100%{transform:scale(1)}}
   .pop{animation:pop .25s ease}
   @media (prefers-reduced-motion: reduce){
@@ -147,41 +150,60 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>Irregular Verbs O'yini</h1>
-    <p>56 fe'l · ingliz ↔ o'zbek</p>
+    <h1 id="hTitle">Irregular Verbs</h1>
+    <p id="hSub">56 verbs · English</p>
   </header>
 
   <div class="stats">
-    <div class="stat score">Ball: <b id="score">0</b></div>
-    <div class="stat streak">🔥 Seriya: <b id="streak">0</b></div>
-    <div class="stat">Eng yaxshi: <b id="best">0</b></div>
+    <div class="stat score"><span data-i18n="score">Ball</span>: <b id="score">0</b></div>
+    <div class="stat streak">🔥 <span data-i18n="streak">Seriya</span>: <b id="streak">0</b></div>
+    <div class="stat"><span data-i18n="best">Eng yaxshi</span>: <b id="best">0</b></div>
+    <button class="stat" id="langBtn" type="button">🌐</button>
   </div>
 
-  <div class="screen active" id="menu">
+  <div class="screen active" id="lang">
+    <div class="lang-title">Выберите язык · Tilni tanlang · Забонро интихоб кунед</div>
+    <div class="menu">
+      <button class="mode-btn" type="button" data-setlang="ru">
+        <span class="emoji">🇷🇺</span>Русский
+        <small>Играть с русским переводом</small>
+      </button>
+      <button class="mode-btn" type="button" data-setlang="uz">
+        <span class="emoji">🇺🇿</span>O'zbekcha
+        <small>O'zbekcha tarjima bilan o'ynash</small>
+      </button>
+      <button class="mode-btn" type="button" data-setlang="tj">
+        <span class="emoji">🇹🇯</span>Тоҷикӣ
+        <small>Бо тарҷумаи тоҷикӣ бозӣ кардан</small>
+      </button>
+    </div>
+  </div>
+
+  <div class="screen" id="menu">
     <div class="menu">
       <button class="mode-btn" onclick="startCards()">
-        <span class="emoji">🃏</span>Kartochkalar
-        <small>So'zlarni ko'rib chiqing — bosib javobni oching</small>
+        <span class="emoji">🃏</span><span data-i18n="modeCards"></span>
+        <small data-i18n="modeCardsS"></small>
       </button>
-      <button class="mode-btn" onclick="startQuiz('uz')">
-        <span class="emoji">🎯</span>Viktorina: tarjima
-        <small>Inglizcha fe'lning o'zbekcha tarjimasini toping</small>
+      <button class="mode-btn" onclick="startQuiz('tr')">
+        <span class="emoji">🎯</span><span data-i18n="modeQuizTr"></span>
+        <small data-i18n="modeQuizTrS"></small>
       </button>
       <button class="mode-btn" onclick="startQuiz('past')">
-        <span class="emoji">⏪</span>Viktorina: Past Simple
-        <small>Fe'lning 2-shaklini tanlang (go → went)</small>
+        <span class="emoji">⏪</span><span data-i18n="modeQuizPast"></span>
+        <small data-i18n="modeQuizPastS"></small>
       </button>
       <button class="mode-btn" onclick="startType()">
-        <span class="emoji">⌨️</span>Yozish rejimi (qiyin!)
-        <small>Past Simple shaklini o'zingiz yozing</small>
+        <span class="emoji">⌨️</span><span data-i18n="modeType"></span>
+        <small data-i18n="modeTypeS"></small>
       </button>
       <button class="mode-btn" onclick="startSent()">
-        <span class="emoji">📝</span>Gaplar ichida
-        <small>Gapdagi bo'sh joyga to'g'ri shaklni yozing</small>
+        <span class="emoji">📝</span><span data-i18n="modeSent"></span>
+        <small data-i18n="modeSentS"></small>
       </button>
       <button class="mode-btn" onclick="startMatch()">
-        <span class="emoji">🧩</span>Juftliklarni toping
-        <small>Fe'l va uning o'tgan zamonini juftlang (xotira o'yini)</small>
+        <span class="emoji">🧩</span><span data-i18n="modeMatch"></span>
+        <small data-i18n="modeMatchS"></small>
       </button>
     </div>
   </div>
@@ -192,11 +214,11 @@
       <div class="word" id="cardWord"></div>
       <div class="forms" id="cardForms" style="display:none"></div>
       <div class="uz" id="cardUz" style="display:none"></div>
-      <div class="hint" id="cardHint">bosing — javob ochiladi</div>
+      <div class="hint" id="cardHint"></div>
     </div>
     <div class="nav-row">
-      <button class="btn secondary" onclick="goMenu()">← Menyu</button>
-      <button class="btn yellow" onclick="nextCard()">Keyingisi →</button>
+      <button class="btn secondary" onclick="goMenu()" data-i18n="menu"></button>
+      <button class="btn yellow" onclick="nextCard()" data-i18n="next"></button>
     </div>
   </div>
 
@@ -208,21 +230,21 @@
     </div>
     <div class="options" id="options"></div>
     <div class="nav-row">
-      <button class="btn secondary" onclick="goMenu()">← Menyu</button>
+      <button class="btn secondary" onclick="goMenu()" data-i18n="menu"></button>
     </div>
   </div>
 
   <div class="screen" id="typing">
     <div class="progress-bar"><div class="progress-fill" id="typeProgress"></div></div>
     <div class="question">
-      <div class="q-label">Past Simple shaklini yozing:</div>
+      <div class="q-label" data-i18n="qType"></div>
       <div class="q-word" id="typeWord"></div>
     </div>
-    <input class="type-input" id="typeInput" autocomplete="off" autocapitalize="off" placeholder="javobni yozing...">
+    <input class="type-input" id="typeInput" autocomplete="off" autocapitalize="off">
     <div class="feedback" id="typeFeedback"></div>
     <div class="nav-row">
-      <button class="btn secondary" onclick="goMenu()">← Menyu</button>
-      <button class="btn" onclick="checkType()" id="typeBtn">Tekshirish</button>
+      <button class="btn secondary" onclick="goMenu()" data-i18n="menu"></button>
+      <button class="btn" onclick="checkType()" id="typeBtn" data-i18n="check"></button>
     </div>
   </div>
 
@@ -232,98 +254,173 @@
       <div class="q-label" id="sentLabel"></div>
       <div class="q-word" id="sentText" style="font-size:21px;line-height:1.5"></div>
     </div>
-    <input class="type-input" id="sentInput" autocomplete="off" autocapitalize="off" placeholder="javobni yozing...">
+    <input class="type-input" id="sentInput" autocomplete="off" autocapitalize="off">
     <div class="feedback" id="sentFeedback"></div>
     <div class="nav-row">
-      <button class="btn secondary" onclick="goMenu()">← Menyu</button>
-      <button class="btn" onclick="checkSent()">Tekshirish</button>
+      <button class="btn secondary" onclick="goMenu()" data-i18n="menu"></button>
+      <button class="btn" onclick="checkSent()" data-i18n="check"></button>
     </div>
   </div>
 
   <div class="screen" id="match">
     <div class="progress-bar"><div class="progress-fill" id="matchProgress"></div></div>
     <div class="question" style="padding:12px">
-      <div class="q-label">Fe'lni uning Past Simple shakli bilan juftlang</div>
+      <div class="q-label" data-i18n="matchLabel"></div>
       <div style="font-size:14px;opacity:.7" id="matchRound"></div>
     </div>
     <div id="matchGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div>
     <div class="nav-row">
-      <button class="btn secondary" onclick="goMenu()">← Menyu</button>
+      <button class="btn secondary" onclick="goMenu()" data-i18n="menu"></button>
     </div>
   </div>
 
   <div class="screen" id="result">
     <div class="result">
-      <h2 id="resTitle">Natija</h2>
+      <h2 id="resTitle"></h2>
       <div class="big" id="resEmoji">🎉</div>
       <p id="resText"></p>
       <p id="resAdvice" style="font-style:italic;opacity:.7"></p>
       <div class="nav-row">
-        <button class="btn secondary" onclick="goMenu()">Menyu</button>
-        <button class="btn yellow" onclick="repeatMode()">Yana o'ynash</button>
+        <button class="btn secondary" onclick="goMenu()" data-i18n="menuBtn"></button>
+        <button class="btn yellow" onclick="repeatMode()" data-i18n="again"></button>
       </div>
     </div>
   </div>
 </div>
 
 <script>
+const I18N={
+  ru:{
+    title:"Игра: Irregular Verbs", subtitle:"56 глаголов · английский ↔ русский",
+    score:"Очки", streak:"Серия", best:"Рекорд",
+    modeCards:"Карточки", modeCardsS:"Просматривайте слова — нажмите, чтобы открыть ответ",
+    modeQuizTr:"Викторина: перевод", modeQuizTrS:"Найдите русский перевод английского глагола",
+    modeQuizPast:"Викторина: Past Simple", modeQuizPastS:"Выберите 2-ю форму глагола (go → went)",
+    modeType:"Режим письма (сложно!)", modeTypeS:"Напишите форму Past Simple сами",
+    modeSent:"В предложениях", modeSentS:"Впишите правильную форму глагола в пропуск",
+    modeMatch:"Найдите пары", modeMatchS:"Соедините глагол и его прошедшую форму (игра на память)",
+    hintOpen:"нажмите — откроется ответ", hintClose:"нажмите — скроется",
+    menu:"← Меню", menuBtn:"Меню", next:"Дальше →", check:"Проверить", again:"Играть ещё",
+    qTr:"Найдите перевод:", qPast:"Выберите форму Past Simple:", qType:"Напишите форму Past Simple:",
+    placeholder:"введите ответ...",
+    verb:"Глагол", round:"Раунд",
+    matchLabel:"Соедините глагол с его формой Past Simple",
+    ok:"✓ Правильно!", no:"✗ Правильный ответ: ",
+    cardsDone:"Карточки закончились!", cardsDoneT:"Вы просмотрели все 56 глаголов.", cardsDoneA:"Теперь проверьте себя в викторине!",
+    quizDone:"Викторина завершена!", typeDone:"Режим письма завершён!", sentDone:"Предложения закончились!",
+    correctCnt:"Правильные ответы",
+    adv1:"Отличный результат!", adv2:"Хорошо! Сыграйте ещё раз — закрепится ещё лучше.", adv3:"Сначала повторите карточки и попробуйте снова.",
+    advType1:"Вы чемпион!", advType2:"Продолжайте тренироваться!",
+    advSent1:"Отлично! Вы умеете использовать глаголы и в предложениях!", advSent2:"Тренируйтесь ещё — предложения самое важное!",
+    matchDone:"Все пары найдены!", matchDoneT:"Вы соединили {n} глаголов!", matchDoneA:"Каждый раз выпадают новые глаголы — сыграйте ещё!"
+  },
+  uz:{
+    title:"Irregular Verbs O'yini", subtitle:"56 fe'l · ingliz ↔ o'zbek",
+    score:"Ball", streak:"Seriya", best:"Eng yaxshi",
+    modeCards:"Kartochkalar", modeCardsS:"So'zlarni ko'rib chiqing — bosib javobni oching",
+    modeQuizTr:"Viktorina: tarjima", modeQuizTrS:"Inglizcha fe'lning o'zbekcha tarjimasini toping",
+    modeQuizPast:"Viktorina: Past Simple", modeQuizPastS:"Fe'lning 2-shaklini tanlang (go → went)",
+    modeType:"Yozish rejimi (qiyin!)", modeTypeS:"Past Simple shaklini o'zingiz yozing",
+    modeSent:"Gaplar ichida", modeSentS:"Gapdagi bo'sh joyga to'g'ri shaklni yozing",
+    modeMatch:"Juftliklarni toping", modeMatchS:"Fe'l va uning o'tgan zamonini juftlang (xotira o'yini)",
+    hintOpen:"bosing — javob ochiladi", hintClose:"bosing — yashiriladi",
+    menu:"← Menyu", menuBtn:"Menyu", next:"Keyingisi →", check:"Tekshirish", again:"Yana o'ynash",
+    qTr:"Tarjimani toping:", qPast:"Past Simple shaklini tanlang:", qType:"Past Simple shaklini yozing:",
+    placeholder:"javobni yozing...",
+    verb:"Fe'l", round:"Raund",
+    matchLabel:"Fe'lni uning Past Simple shakli bilan juftlang",
+    ok:"✓ To'g'ri!", no:"✗ To'g'ri javob: ",
+    cardsDone:"Kartochkalar tugadi!", cardsDoneT:"Siz barcha 56 fe'lni ko'rib chiqdingiz.", cardsDoneA:"Endi viktorinada o'zingizni sinab ko'ring!",
+    quizDone:"Viktorina tugadi!", typeDone:"Yozish rejimi tugadi!", sentDone:"Gaplar tugadi!",
+    correctCnt:"To'g'ri javoblar",
+    adv1:"Zo'r natija!", adv2:"Yaxshi! Yana bir marta o'ynasangiz, yanada mustahkamlanadi.", adv3:"Avval kartochkalarni takrorlang va yana urinib ko'ring.",
+    advType1:"Siz chempionsiz!", advType2:"Mashq qilishda davom eting!",
+    advSent1:"Ajoyib! Siz gaplarda ham ishlata olasiz!", advSent2:"Yana mashq qiling — gaplar eng muhim qism!",
+    matchDone:"Juftliklar tugadi!", matchDoneT:"Siz {n} ta fe'lni juftladingiz!", matchDoneA:"Har safar yangi fe'llar tushadi — yana o'ynang!"
+  },
+  tj:{
+    title:"Бозии Irregular Verbs", subtitle:"56 феъл · англисӣ ↔ тоҷикӣ",
+    score:"Хол", streak:"Силсила", best:"Рекорд",
+    modeCards:"Кортчаҳо", modeCardsS:"Калимаҳоро бинед — пахш кунед, ҷавоб кушода мешавад",
+    modeQuizTr:"Викторина: тарҷума", modeQuizTrS:"Тарҷумаи тоҷикии феъли англисиро ёбед",
+    modeQuizPast:"Викторина: Past Simple", modeQuizPastS:"Шакли 2-юми феълро интихоб кунед (go → went)",
+    modeType:"Навиштан (душвор!)", modeTypeS:"Шакли Past Simple-ро худатон нависед",
+    modeSent:"Дар дохили ҷумлаҳо", modeSentS:"Ба ҷои холии ҷумла шакли дурустро нависед",
+    modeMatch:"Ҷуфтҳоро ёбед", modeMatchS:"Феъл ва шакли гузаштаи онро ҷуфт кунед (бозии хотира)",
+    hintOpen:"пахш кунед — ҷавоб кушода мешавад", hintClose:"пахш кунед — пинҳон мешавад",
+    menu:"← Меню", menuBtn:"Меню", next:"Навбатӣ →", check:"Санҷидан", again:"Боз бозӣ кардан",
+    qTr:"Тарҷумаро ёбед:", qPast:"Шакли Past Simple-ро интихоб кунед:", qType:"Шакли Past Simple-ро нависед:",
+    placeholder:"ҷавобро нависед...",
+    verb:"Феъл", round:"Раунд",
+    matchLabel:"Феълро бо шакли Past Simple-и он ҷуфт кунед",
+    ok:"✓ Дуруст!", no:"✗ Ҷавоби дуруст: ",
+    cardsDone:"Кортчаҳо тамом шуданд!", cardsDoneT:"Шумо ҳамаи 56 феълро дидед.", cardsDoneA:"Акнун худро дар викторина санҷед!",
+    quizDone:"Викторина тамом шуд!", typeDone:"Навиштан тамом шуд!", sentDone:"Ҷумлаҳо тамом шуданд!",
+    correctCnt:"Ҷавобҳои дуруст",
+    adv1:"Натиҷаи аъло!", adv2:"Хуб! Боз як бор бозӣ кунед, боз ҳам мустаҳкамтар мешавад.", adv3:"Аввал кортчаҳоро такрор кунед ва боз кӯшиш кунед.",
+    advType1:"Шумо чемпион ҳастед!", advType2:"Машқро давом диҳед!",
+    advSent1:"Аъло! Шумо дар ҷумлаҳо ҳам истифода карда метавонед!", advSent2:"Боз машқ кунед — ҷумлаҳо қисми муҳимтарин!",
+    matchDone:"Ҷуфтҳо тамом шуданд!", matchDoneT:"Шумо {n} феълро ҷуфт кардед!", matchDoneA:"Ҳар дафъа феълҳои нав меоянд — боз бозӣ кунед!"
+  }
+};
+
 const VERBS=[
-  {base:"be",past:"was / were",pastArr:["was","were","was/were","was / were"],uz:"bo'lmoq"},
-  {base:"beat",past:"beat",pastArr:["beat"],uz:"urmoq"},
-  {base:"become",past:"became",pastArr:["became"],uz:"bo'lmoq (o'zgarish)"},
-  {base:"begin",past:"began",pastArr:["began"],uz:"boshlamoq"},
-  {base:"break",past:"broke",pastArr:["broke"],uz:"sindirmoq"},
-  {base:"bring",past:"brought",pastArr:["brought"],uz:"olib kelmoq"},
-  {base:"build",past:"built",pastArr:["built"],uz:"qurmoq"},
-  {base:"buy",past:"bought",pastArr:["bought"],uz:"sotib olmoq"},
-  {base:"catch",past:"caught",pastArr:["caught"],uz:"tutmoq"},
-  {base:"choose",past:"chose",pastArr:["chose"],uz:"tanlamoq"},
-  {base:"come",past:"came",pastArr:["came"],uz:"kelmoq"},
-  {base:"cut",past:"cut",pastArr:["cut"],uz:"kesmoq"},
-  {base:"do",past:"did",pastArr:["did"],uz:"qilmoq"},
-  {base:"draw",past:"drew",pastArr:["drew"],uz:"chizmoq"},
-  {base:"drink",past:"drank",pastArr:["drank"],uz:"ichmoq"},
-  {base:"drive",past:"drove",pastArr:["drove"],uz:"haydamoq"},
-  {base:"eat",past:"ate",pastArr:["ate"],uz:"yemoq"},
-  {base:"fall",past:"fell",pastArr:["fell"],uz:"yiqilmoq"},
-  {base:"feel",past:"felt",pastArr:["felt"],uz:"his qilmoq"},
-  {base:"find",past:"found",pastArr:["found"],uz:"topmoq"},
-  {base:"fly",past:"flew",pastArr:["flew"],uz:"uchmoq"},
-  {base:"get",past:"got",pastArr:["got"],uz:"olmoq"},
-  {base:"give",past:"gave",pastArr:["gave"],uz:"bermoq"},
-  {base:"go",past:"went",pastArr:["went"],uz:"bormoq"},
-  {base:"grow",past:"grew",pastArr:["grew"],uz:"o'smoq"},
-  {base:"have",past:"had",pastArr:["had"],uz:"ega bo'lmoq"},
-  {base:"hear",past:"heard",pastArr:["heard"],uz:"eshitmoq"},
-  {base:"hold",past:"held",pastArr:["held"],uz:"ushlamoq"},
-  {base:"keep",past:"kept",pastArr:["kept"],uz:"saqlamoq"},
-  {base:"know",past:"knew",pastArr:["knew"],uz:"bilmoq"},
-  {base:"learn",past:"learnt / learned",pastArr:["learnt","learned","learnt/learned","learnt / learned"],uz:"o'rganmoq"},
-  {base:"leave",past:"left",pastArr:["left"],uz:"tark etmoq"},
-  {base:"lose",past:"lost",pastArr:["lost"],uz:"yo'qotmoq"},
-  {base:"make",past:"made",pastArr:["made"],uz:"yasamoq"},
-  {base:"meet",past:"met",pastArr:["met"],uz:"uchrashmoq"},
-  {base:"read",past:"read",pastArr:["read"],uz:"o'qimoq"},
-  {base:"ride",past:"rode",pastArr:["rode"],uz:"minmoq"},
-  {base:"run",past:"ran",pastArr:["ran"],uz:"yugurmoq"},
-  {base:"say",past:"said",pastArr:["said"],uz:"aytmoq"},
-  {base:"see",past:"saw",pastArr:["saw"],uz:"ko'rmoq"},
-  {base:"sell",past:"sold",pastArr:["sold"],uz:"sotmoq"},
-  {base:"send",past:"sent",pastArr:["sent"],uz:"yubormoq"},
-  {base:"sit",past:"sat",pastArr:["sat"],uz:"o'tirmoq"},
-  {base:"sleep",past:"slept",pastArr:["slept"],uz:"uxlamoq"},
-  {base:"speak",past:"spoke",pastArr:["spoke"],uz:"gapirmoq"},
-  {base:"stand",past:"stood",pastArr:["stood"],uz:"turmoq"},
-  {base:"swim",past:"swam",pastArr:["swam"],uz:"suzmoq"},
-  {base:"take",past:"took",pastArr:["took"],uz:"olmoq (olib ketmoq)"},
-  {base:"teach",past:"taught",pastArr:["taught"],uz:"o'qitmoq"},
-  {base:"tell",past:"told",pastArr:["told"],uz:"aytib bermoq"},
-  {base:"think",past:"thought",pastArr:["thought"],uz:"o'ylamoq"},
-  {base:"throw",past:"threw",pastArr:["threw"],uz:"uloqtirmoq"},
-  {base:"understand",past:"understood",pastArr:["understood"],uz:"tushunmoq"},
-  {base:"wear",past:"wore",pastArr:["wore"],uz:"kiymoq"},
-  {base:"win",past:"won",pastArr:["won"],uz:"yutmoq"},
-  {base:"write",past:"wrote",pastArr:["wrote"],uz:"yozmoq"}
+  {base:"be",past:"was / were",pastArr:["was","were","was/were","was / were"],uz:"bo'lmoq",ru:"быть",tj:"будан"},
+  {base:"beat",past:"beat",pastArr:["beat"],uz:"urmoq",ru:"бить",tj:"задан"},
+  {base:"become",past:"became",pastArr:["became"],uz:"bo'lmoq (o'zgarish)",ru:"становиться",tj:"шудан"},
+  {base:"begin",past:"began",pastArr:["began"],uz:"boshlamoq",ru:"начинать",tj:"сар кардан"},
+  {base:"break",past:"broke",pastArr:["broke"],uz:"sindirmoq",ru:"ломать",tj:"шикастан"},
+  {base:"bring",past:"brought",pastArr:["brought"],uz:"olib kelmoq",ru:"приносить",tj:"овардан"},
+  {base:"build",past:"built",pastArr:["built"],uz:"qurmoq",ru:"строить",tj:"бино кардан"},
+  {base:"buy",past:"bought",pastArr:["bought"],uz:"sotib olmoq",ru:"покупать",tj:"харидан"},
+  {base:"catch",past:"caught",pastArr:["caught"],uz:"tutmoq",ru:"ловить",tj:"дошта гирифтан"},
+  {base:"choose",past:"chose",pastArr:["chose"],uz:"tanlamoq",ru:"выбирать",tj:"интихоб кардан"},
+  {base:"come",past:"came",pastArr:["came"],uz:"kelmoq",ru:"приходить",tj:"омадан"},
+  {base:"cut",past:"cut",pastArr:["cut"],uz:"kesmoq",ru:"резать",tj:"буридан"},
+  {base:"do",past:"did",pastArr:["did"],uz:"qilmoq",ru:"делать",tj:"кардан"},
+  {base:"draw",past:"drew",pastArr:["drew"],uz:"chizmoq",ru:"рисовать",tj:"расм кашидан"},
+  {base:"drink",past:"drank",pastArr:["drank"],uz:"ichmoq",ru:"пить",tj:"нӯшидан"},
+  {base:"drive",past:"drove",pastArr:["drove"],uz:"haydamoq",ru:"водить (машину)",tj:"рондан"},
+  {base:"eat",past:"ate",pastArr:["ate"],uz:"yemoq",ru:"есть (кушать)",tj:"хӯрдан"},
+  {base:"fall",past:"fell",pastArr:["fell"],uz:"yiqilmoq",ru:"падать",tj:"афтидан"},
+  {base:"feel",past:"felt",pastArr:["felt"],uz:"his qilmoq",ru:"чувствовать",tj:"ҳис кардан"},
+  {base:"find",past:"found",pastArr:["found"],uz:"topmoq",ru:"находить",tj:"ёфтан"},
+  {base:"fly",past:"flew",pastArr:["flew"],uz:"uchmoq",ru:"летать",tj:"паридан"},
+  {base:"get",past:"got",pastArr:["got"],uz:"olmoq",ru:"получать",tj:"ба даст овардан"},
+  {base:"give",past:"gave",pastArr:["gave"],uz:"bermoq",ru:"давать",tj:"додан"},
+  {base:"go",past:"went",pastArr:["went"],uz:"bormoq",ru:"идти",tj:"рафтан"},
+  {base:"grow",past:"grew",pastArr:["grew"],uz:"o'smoq",ru:"расти",tj:"калон шудан"},
+  {base:"have",past:"had",pastArr:["had"],uz:"ega bo'lmoq",ru:"иметь",tj:"доштан"},
+  {base:"hear",past:"heard",pastArr:["heard"],uz:"eshitmoq",ru:"слышать",tj:"шунидан"},
+  {base:"hold",past:"held",pastArr:["held"],uz:"ushlamoq",ru:"держать",tj:"дар даст доштан"},
+  {base:"keep",past:"kept",pastArr:["kept"],uz:"saqlamoq",ru:"хранить",tj:"нигоҳ доштан"},
+  {base:"know",past:"knew",pastArr:["knew"],uz:"bilmoq",ru:"знать",tj:"донистан"},
+  {base:"learn",past:"learnt / learned",pastArr:["learnt","learned","learnt/learned","learnt / learned"],uz:"o'rganmoq",ru:"учить(ся)",tj:"омӯхтан"},
+  {base:"leave",past:"left",pastArr:["left"],uz:"tark etmoq",ru:"покидать",tj:"тарк кардан"},
+  {base:"lose",past:"lost",pastArr:["lost"],uz:"yo'qotmoq",ru:"терять",tj:"гум кардан"},
+  {base:"make",past:"made",pastArr:["made"],uz:"yasamoq",ru:"делать (создавать)",tj:"сохтан"},
+  {base:"meet",past:"met",pastArr:["met"],uz:"uchrashmoq",ru:"встречать",tj:"вохӯрдан"},
+  {base:"read",past:"read",pastArr:["read"],uz:"o'qimoq",ru:"читать",tj:"хондан"},
+  {base:"ride",past:"rode",pastArr:["rode"],uz:"minmoq",ru:"ездить верхом",tj:"савора рафтан"},
+  {base:"run",past:"ran",pastArr:["ran"],uz:"yugurmoq",ru:"бегать",tj:"давидан"},
+  {base:"say",past:"said",pastArr:["said"],uz:"aytmoq",ru:"сказать",tj:"гуфтан"},
+  {base:"see",past:"saw",pastArr:["saw"],uz:"ko'rmoq",ru:"видеть",tj:"дидан"},
+  {base:"sell",past:"sold",pastArr:["sold"],uz:"sotmoq",ru:"продавать",tj:"фурӯхтан"},
+  {base:"send",past:"sent",pastArr:["sent"],uz:"yubormoq",ru:"отправлять",tj:"фиристодан"},
+  {base:"sit",past:"sat",pastArr:["sat"],uz:"o'tirmoq",ru:"сидеть",tj:"нишастан"},
+  {base:"sleep",past:"slept",pastArr:["slept"],uz:"uxlamoq",ru:"спать",tj:"хобидан"},
+  {base:"speak",past:"spoke",pastArr:["spoke"],uz:"gapirmoq",ru:"разговаривать",tj:"гап задан"},
+  {base:"stand",past:"stood",pastArr:["stood"],uz:"turmoq",ru:"стоять",tj:"истодан"},
+  {base:"swim",past:"swam",pastArr:["swam"],uz:"suzmoq",ru:"плавать",tj:"шино кардан"},
+  {base:"take",past:"took",pastArr:["took"],uz:"olmoq (olib ketmoq)",ru:"брать",tj:"гирифтан"},
+  {base:"teach",past:"taught",pastArr:["taught"],uz:"o'qitmoq",ru:"обучать",tj:"таълим додан"},
+  {base:"tell",past:"told",pastArr:["told"],uz:"aytib bermoq",ru:"рассказывать",tj:"нақл кардан"},
+  {base:"think",past:"thought",pastArr:["thought"],uz:"o'ylamoq",ru:"думать",tj:"фикр кардан"},
+  {base:"throw",past:"threw",pastArr:["threw"],uz:"uloqtirmoq",ru:"бросать",tj:"партофтан"},
+  {base:"understand",past:"understood",pastArr:["understood"],uz:"tushunmoq",ru:"понимать",tj:"фаҳмидан"},
+  {base:"wear",past:"wore",pastArr:["wore"],uz:"kiymoq",ru:"носить (одежду)",tj:"пӯшидан"},
+  {base:"win",past:"won",pastArr:["won"],uz:"yutmoq",ru:"выигрывать",tj:"ғолиб шудан"},
+  {base:"write",past:"wrote",pastArr:["wrote"],uz:"yozmoq",ru:"писать",tj:"навиштан"}
 ];
 
 const SENTENCES=[
@@ -354,9 +451,37 @@ const SENTENCES=[
   {s:"He ___ terrible after eating the prawns.",v:"feel",a:["felt"]}
 ];
 
+let lang=null;
+function L(){return I18N[lang]||I18N.ru}
+function tr(v){return v[lang]||v.ru}
+
+function applyLang(){
+  const t=L();
+  document.documentElement.lang = lang==='uz'?'uz':(lang==='tj'?'tg':'ru');
+  document.getElementById('hTitle').textContent=t.title;
+  document.getElementById('hSub').textContent=t.subtitle;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k=el.getAttribute('data-i18n');
+    if(t[k])el.textContent=t[k];
+  });
+  document.getElementById('typeInput').placeholder=t.placeholder;
+  document.getElementById('sentInput').placeholder=t.placeholder;
+}
+function setLang(l){
+  lang=l;
+  try{localStorage.setItem('ivLang',l)}catch(e){}
+  applyLang();
+  show('menu');
+}
+
+document.querySelectorAll('[data-setlang]').forEach(b=>{
+  b.addEventListener('click',()=>setLang(b.getAttribute('data-setlang')));
+});
+document.getElementById('langBtn').addEventListener('click',()=>show('lang'));
+
 let score=0,streak=0,best=0;
 let deck=[],idx=0,flipped=false;
-let quizType='uz',correctCount=0,lastMode=null;
+let quizType='tr',correctCount=0,lastMode=null;
 
 function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
@@ -384,8 +509,8 @@ function renderCard(){
   document.getElementById('cardForms').style.display='none';
   document.getElementById('cardUz').style.display='none';
   document.getElementById('cardForms').textContent=v.base+" – "+v.past;
-  document.getElementById('cardUz').textContent=v.uz;
-  document.getElementById('cardHint').textContent='bosing — javob ochiladi';
+  document.getElementById('cardUz').textContent=tr(v);
+  document.getElementById('cardHint').textContent=L().hintOpen;
   document.getElementById('cardProgress').style.width=((idx)/deck.length*100)+'%';
   document.getElementById('flashcard').classList.remove('pop');
   void document.getElementById('flashcard').offsetWidth;
@@ -395,11 +520,11 @@ function flipCard(){
   flipped=!flipped;
   document.getElementById('cardForms').style.display=flipped?'block':'none';
   document.getElementById('cardUz').style.display=flipped?'block':'none';
-  document.getElementById('cardHint').textContent=flipped?'bosing — yashiriladi':'bosing — javob ochiladi';
+  document.getElementById('cardHint').textContent=flipped?L().hintClose:L().hintOpen;
 }
 function nextCard(){
   idx++;
-  if(idx>=deck.length){finish('Kartochkalar tugadi!','📚','Siz barcha 56 fe\'lni ko\'rib chiqdingiz.','Endi viktorinada o\'zingizni sinab ko\'ring!');return}
+  if(idx>=deck.length){finish(L().cardsDone,'📚',L().cardsDoneT,L().cardsDoneA);return}
   renderCard();
 }
 
@@ -414,14 +539,14 @@ function renderQuiz(){
   const label=document.getElementById('qLabel');
   const word=document.getElementById('qWord');
   let correct,pool;
-  if(quizType==='uz'){
-    label.textContent='Tarjimani toping:';
+  if(quizType==='tr'){
+    label.textContent=L().qTr;
     word.textContent=v.base+' – '+v.past;
-    correct=v.uz;
-    pool=VERBS.filter(x=>x.uz!==v.uz).map(x=>x.uz);
+    correct=tr(v);
+    pool=VERBS.filter(x=>tr(x)!==tr(v)).map(x=>tr(x));
   }else{
-    label.textContent='Past Simple shaklini tanlang:';
-    word.textContent=v.base+'  ('+v.uz+')';
+    label.textContent=L().qPast;
+    word.textContent=v.base+'  ('+tr(v)+')';
     correct=v.past;
     pool=VERBS.filter(x=>x.past!==v.past).map(x=>x.past);
   }
@@ -451,10 +576,10 @@ function answerQuiz(btn,ok,correct){
 }
 function finishQuiz(){
   const pct=Math.round(correctCount/deck.length*100);
-  let emoji='🎉',advice='Zo\'r natija!';
-  if(pct<50){emoji='💪';advice='Avval kartochkalarni takrorlang va yana urinib ko\'ring.'}
-  else if(pct<80){emoji='👍';advice='Yaxshi! Yana bir marta o\'ynasangiz, yanada mustahkamlanadi.'}
-  finish('Viktorina tugadi!',emoji,`To'g'ri javoblar: ${correctCount} / ${deck.length} (${pct}%)`,advice);
+  let emoji='🎉',advice=L().adv1;
+  if(pct<50){emoji='💪';advice=L().adv3}
+  else if(pct<80){emoji='👍';advice=L().adv2}
+  finish(L().quizDone,emoji,`${L().correctCnt}: ${correctCount} / ${deck.length} (${pct}%)`,advice);
 }
 
 function startType(){
@@ -465,7 +590,7 @@ function startType(){
 function renderType(){
   const v=deck[idx];
   document.getElementById('typeProgress').style.width=(idx/deck.length*100)+'%';
-  document.getElementById('typeWord').textContent=v.base+'  ('+v.uz+')';
+  document.getElementById('typeWord').textContent=v.base+'  ('+tr(v)+')';
   document.getElementById('typeInput').value='';
   document.getElementById('typeFeedback').textContent='';
   document.getElementById('typeFeedback').className='feedback';
@@ -478,14 +603,14 @@ function checkType(){
   const ok=v.pastArr.some(p=>p.toLowerCase()===val);
   const fb=document.getElementById('typeFeedback');
   addPoint(ok);
-  if(ok){fb.textContent='✓ To\'g\'ri!';fb.className='feedback ok'}
-  else{fb.textContent='✗ To\'g\'ri javob: '+v.past;fb.className='feedback no'}
+  if(ok){fb.textContent=L().ok;fb.className='feedback ok'}
+  else{fb.textContent=L().no+v.past;fb.className='feedback no'}
   setTimeout(()=>{
     idx++;
     if(idx>=deck.length){
       const pct=Math.round(correctCount/deck.length*100);
       let emoji=pct>=80?'🏆':pct>=50?'👍':'💪';
-      finish('Yozish rejimi tugadi!',emoji,`To'g'ri: ${correctCount} / ${deck.length} (${pct}%)`,pct>=80?'Siz chempionsiz!':'Mashq qilishda davom eting!');
+      finish(L().typeDone,emoji,`${L().correctCnt}: ${correctCount} / ${deck.length} (${pct}%)`,pct>=80?L().advType1:L().advType2);
       return;
     }
     renderType();
@@ -502,7 +627,7 @@ function startSent(){
 function renderSent(){
   const q=sentDeck[idx];
   document.getElementById('sentProgress').style.width=(idx/sentDeck.length*100)+'%';
-  document.getElementById('sentLabel').textContent='Fe\'l: '+q.v+'  ('+(idx+1)+'/'+sentDeck.length+')';
+  document.getElementById('sentLabel').textContent=L().verb+': '+q.v+'  ('+(idx+1)+'/'+sentDeck.length+')';
   document.getElementById('sentText').textContent=q.s;
   document.getElementById('sentInput').value='';
   document.getElementById('sentFeedback').textContent='';
@@ -516,13 +641,13 @@ function checkSent(){
   const ok=q.a.some(p=>p.toLowerCase()===val);
   const fb=document.getElementById('sentFeedback');
   addPoint(ok);
-  if(ok){fb.textContent='✓ To\'g\'ri! '+q.s.replace('___',q.a[0]);fb.className='feedback ok'}
-  else{fb.textContent='✗ To\'g\'ri javob: '+q.a[0];fb.className='feedback no'}
+  if(ok){fb.textContent=L().ok+' '+q.s.replace('___',q.a[0]);fb.className='feedback ok'}
+  else{fb.textContent=L().no+q.a[0];fb.className='feedback no'}
   setTimeout(()=>{
     idx++;
     if(idx>=sentDeck.length){
       const pct=Math.round(correctCount/sentDeck.length*100);
-      finish('Gaplar tugadi!',pct>=80?'🏆':pct>=50?'👍':'💪',`To'g'ri: ${correctCount} / ${sentDeck.length} (${pct}%)`,pct>=80?'Ajoyib! Siz gaplarda ham ishlata olasiz!':'Yana mashq qiling — gaplar eng muhim qism!');
+      finish(L().sentDone,pct>=80?'🏆':pct>=50?'👍':'💪',`${L().correctCnt}: ${correctCount} / ${sentDeck.length} (${pct}%)`,pct>=80?L().advSent1:L().advSent2);
       return;
     }
     renderSent();
@@ -540,7 +665,7 @@ function renderMatch(){
   matchSel=null;matchBusy=false;
   const verbs=deck.slice(matchRound*6,matchRound*6+6);
   matchLeft=verbs.length;
-  document.getElementById('matchRound').textContent='Raund '+(matchRound+1)+' / '+matchTotalRounds;
+  document.getElementById('matchRound').textContent=L().round+' '+(matchRound+1)+' / '+matchTotalRounds;
   document.getElementById('matchProgress').style.width=(matchRound/matchTotalRounds*100)+'%';
   const tiles=[];
   verbs.forEach(v=>{
@@ -569,7 +694,7 @@ function tapTile(b){
       setTimeout(()=>{
         matchRound++;
         if(matchRound>=matchTotalRounds){
-          finish('Juftliklar tugadi!','🧩','Siz '+(matchTotalRounds*6)+' ta fe\'lni juftladingiz!','Har safar yangi fe\'llar tushadi — yana o\'ynang!');
+          finish(L().matchDone,'🧩',L().matchDoneT.replace('{n}',matchTotalRounds*6),L().matchDoneA);
         }else{renderMatch()}
       },600);
     }
@@ -591,6 +716,16 @@ function finish(title,emoji,text,advice){
   show('result');
 }
 function repeatMode(){if(lastMode)lastMode()}
+
+(function init(){
+  let saved=null;
+  try{saved=localStorage.getItem('ivLang')}catch(e){}
+  if(saved && I18N[saved]){
+    lang=saved;
+    applyLang();
+    show('menu');
+  }
+})();
 </script>
 </body>
 </html>
